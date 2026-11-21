@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">টাকা কাউন্টার প্রো</string>
+    <string name="webview_content_description">টাকা কাউন্টার প্রো অ্যাপ ইন্টারফেস</string>
+    <string name="error_no_app_for_link">এই লিংকটি খোলার জন্য উপযুক্ত কোনো অ্যাপ পাওয়া যায়নি।</string>
+</resources>

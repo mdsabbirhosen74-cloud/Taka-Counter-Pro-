@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>টাকা কাউন্টার প্রো</title>
+    
+    <!-- Google Fonts: Hind Siliguri for Bangla & Inter for crisp numbers/English -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Hind Siliguri"', '"Inter"', 'sans-serif'],
+                        num: ['"Inter"', '"Hind Siliguri"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Remove default number input spinners */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        /* Smooth subtle scrollbar for desktop & mobile */
+        .custom-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.35);
+            border-radius: 9999px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.55);
+        }
+
+        /* Prevent double-tap zoom on quick stepper buttons */
+        button {
+            touch-action: manipulation;
+        }
+
+        /* Modal transitions */
+        .modal-backdrop {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.22s ease, visibility 0.22s ease;
+        }
+        .modal-backdrop.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-card {
+            transform: scale(0.94) translateY(8px);
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .modal-backdrop.active .modal-card {
+            transform: scale(1) translateY(0);
+        }
+
+        /* Toast animation */
+        .toast-pill {
+            opacity: 0;
+            visibility: hidden;
+            transform: translate(-50%, 16px) scale(0.95);
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .toast-pill.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, 0) scale(1);
+        }
+    </style>
+</head>
+<body class="bg-slate-200 dark:bg-slate-950 text-slate-800 dark:text-slate-100 antialiased selection:bg-emerald-500 selection:text-white transition-colors duration-300">
+
+    <!-- Main Centered Mobile-First App Shell -->
+    <div class="w-full max-w-md mx-auto h-[100dvh] bg-slate-50 dark:bg-slate-900 flex flex-col relative shadow-2xl sm:border-x border-slate-200/80 dark:border-slate-800 overflow-hidden transition-colors duration-300">
+
+        <!-- ==================== TOP MODERN HEADER ==================== -->
+        <header class="bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-700 dark:from-emerald-800 dark:via-emerald-900 dark:to-teal-950 text-white px-4 pt-3.5 pb-4 rounded-b-3xl shadow-lg shadow-emerald-900/15 z-20 flex-shrink-0">
+            
+            <!-- Title & Quick Utility Row (Language + Theme) -->
+            <div class="flex items-center justify-between mb-3.5">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-inner">
+                        <i class="fas fa-wallet text-emerald-50 text-base"></i>
+                    </div>
+                    <div>
+                        <h1 id="appTitle" class="text-lg font-bold leading-tight tracking-tight">টাকা কাউন্টার প্রো</h1>
+                        <p id="appSubtitle" class="text-[11px] text-emerald-100/85 font-medium leading-none mt-0.5">সহজ ও নির্ভুল নোট হিসাব</p>
+                    </div>
+                </div>
+
+                <!-- Language Pill & Dark Mode Switch -->
+                <div class="flex items-center gap-1.5">
+                    <button onclick="toggleLanguage()" id="langBtn" class="px-2.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 active:scale-95 border border-white/15 text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer" title="ভাষা পরিবর্তন">
+                        <i class="fas fa-globe text-[11px]"></i>
+                        <span id="langLabel">EN</span>
+                    </button>
+                    <button onclick="toggleTheme()" id="themeBtn" class="w-8 h-8 rounded-xl bg-white/15 hover:bg-white/25 active:scale-95 border border-white/15 flex items-center justify-center transition-all cursor-pointer" title="থিম পরিবর্তন">
+                        <i id="themeIcon" class="fas fa-moon text-xs"></i>
+                    </button>
+                    <button onclick="openAboutModal()" id="aboutBtn" class="w-8 h-8 rounded-xl bg-white/15 hover:bg-white/25 active:scale-95 border border-white/15 flex items-center justify-center transition-all cursor-pointer" title="ডেভলপার তথ্য">
+                        <i class="fas fa-circle-info text-xs"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Action Toolbar -->
+            <div class="grid grid-cols-4 gap-2">
+                <!-- History -->
+                <button onclick="openHistory()" class="flex flex-col items-center justify-center gap-1 py-2 px-1 rounded-2xl bg-white/12 hover:bg-white/20 active:scale-95 border border-white/10 backdrop-blur-sm transition-all cursor-pointer">
+                    <i class="fas fa-clock-rotate-left text-sm"></i>
+                    <span id="btnHistoryText" class="text-[11px] font-medium leading-none">হিস্ট্রি</span>
+                </button>
+
+                <!-- Copy Summary -->
+                <button onclick="copySummary()" class="flex flex-col items-center justify-center gap-1 py-2 px-1 rounded-2xl bg-white/12 hover:bg-white/20 active:scale-95 border border-white/10 backdrop-blur-sm transition-all cursor-pointer">
+                    <i class="fas fa-copy text-sm"></i>
+                    <span id="btnCopyText" class="text-[11px] font-medium leading-none">কপি</span>
+                </button>
+
+                <!-- Save -->
+                <button onclick="openSaveModal()" class="flex flex-col items-center justify-center gap-1 py-2 px-1 rounded-2xl bg-white/12 hover:bg-white/20 active:scale-95 border border-white/10 backdrop-blur-sm transition-all cursor-pointer">
+                    <i class="fas fa-bookmark text-sm"></i>
+                    <span id="btnSaveText" class="text-[11px] font-medium leading-none">সেভ</span>
+                </button>
+
+                <!-- Reset (Clear) -->
+                <button onclick="requestReset()" class="flex flex-col items-center justify-center gap-1 py-2 px-1 rounded-2xl bg-rose-500/90 hover:bg-rose-500 active:scale-95 border border-rose-300/30 shadow-md shadow-rose-900/20 transition-all cursor-pointer">
+                    <i class="fas fa-trash-can text-sm"></i>
+                    <span id="btnResetText" class="text-[11px] font-medium leading-none">রিসেট</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- ==================== DENOMINATIONS LIST ==================== -->
+        <main class="flex-1 overflow-y-auto custom-scroll px-3 py-3 space-y-2.5" id="inputList">
+            <!-- Denomination rows injected via JavaScript -->
+        </main>
+
+        <!-- ==================== STICKY SUMMARY FOOTER ==================== -->
+        <footer class="bg-white dark:bg-slate-800/95 backdrop-blur-md px-4 pt-3.5 pb-4 rounded-t-3xl border-t border-slate-200/80 dark:border-slate-700/80 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_-8px_30px_rgba(0,0,0,0.3)] z-20 flex-shrink-0 transition-colors duration-300">
+            
+            <!-- Amount in Words Pill -->
+            <div id="wordBox" class="bg-emerald-50/90 dark:bg-emerald-950/50 border border-emerald-200/70 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300 rounded-xl px-3 py-2 mb-3 min-h-[38px] flex items-center justify-center text-center transition-colors">
+                <span id="wordDisplay" class="text-xs sm:text-[13px] font-semibold leading-snug">টাকার পরিমাণ লিখুন</span>
+            </div>
+
+            <!-- Grand Total & Total Notes Row -->
+            <div class="flex items-end justify-between gap-3">
+                <div class="min-w-0 flex-1">
+                    <div id="totalLabel" class="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400 mb-0.5">সর্বমোট টাকা</div>
+                    <div id="grandTotal" class="font-num text-2xl sm:text-3xl font-extrabold text-emerald-700 dark:text-emerald-400 leading-none tracking-tight tabular-nums truncate">
+                        ৳ 0
+                    </div>
+                </div>
+
+                <!-- Total Notes Counter Pill -->
+                <div class="flex items-center gap-2.5 bg-slate-100 dark:bg-slate-700/70 border border-slate-200/70 dark:border-slate-600/60 px-3.5 py-2 rounded-2xl flex-shrink-0">
+                    <div class="w-7 h-7 rounded-xl bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-300 flex items-center justify-center text-xs">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <div class="text-right">
+                        <div id="totalNotesHeading" class="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400 leading-none mb-0.5">মোট নোট</div>
+                        <div id="totalNotesLabel" class="font-num text-sm font-bold text-slate-700 dark:text-slate-100 leading-none tabular-nums">0 টি</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subtle Professional Developer Signature -->
+            <div class="mt-3 pt-2 border-t border-slate-100 dark:border-slate-700/60 flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500">
+                <span id="footerAppVersion" class="font-num font-medium tracking-wide opacity-80">v2.0 Pro</span>
+                <button type="button" onclick="openAboutModal()" class="group inline-flex items-center gap-1.5 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer">
+                    <i class="fas fa-code text-[10px] text-emerald-500/80 group-hover:scale-110 transition-transform"></i>
+                    <span id="footerCreditPrefix">Developed by</span>
+                    <span id="footerDevName" class="font-bold text-slate-600 dark:text-slate-300 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Dreamify Web</span>
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ==================== CONFIRMATION MODAL ==================== -->
+    <div id="confirmModal" class="modal-backdrop fixed inset-0 bg-slate-900/55 backdrop-blur-xs z-[60] flex items-center justify-center p-4" onclick="handleBackdropClick(event, 'confirmModal')">
+        <div class="modal-card bg-white dark:bg-slate-800 w-full max-w-xs rounded-3xl p-6 shadow-2xl border border-slate-100 dark:border-slate-700 text-center relative">
+            <button onclick="closeConfirmModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center transition-colors cursor-pointer">
+                <i class="fas fa-times text-sm"></i>
+            </button>
+
+            <div id="confirmIconWrapper" class="w-16 h-16 rounded-2xl bg-rose-50 dark:bg-rose-950/60 text-rose-500 flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner">
+                <i id="confirmIcon" class="fas fa-broom"></i>
+            </div>
+
+            <h3 id="confirmTitle" class="text-lg font-bold text-slate-800 dark:text-slate-100 mb-1.5">নতুন করে শুরু?</h3>
+            <p id="confirmMsg" class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-6">বর্তমান হিসাব মুছে দিয়ে একদম নতুন করে শুরু করতে চান?</p>
+
+            <div class="flex gap-2.5">
+                <button onclick="closeConfirmModal()" id="confirmCancelBtn" class="flex-1 py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 font-semibold text-sm active:scale-95 transition-all cursor-pointer">
+                    না থাক
+                </button>
+                <button id="confirmActionBtn" class="flex-1 py-2.5 px-4 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-semibold text-sm shadow-lg shadow-rose-500/25 active:scale-95 transition-all cursor-pointer">
+                    হ্যাঁ, মুছুন
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SAVE MODAL ==================== -->
+    <div id="saveModal" class="modal-backdrop fixed inset-0 bg-slate-900/55 backdrop-blur-xs z-50 flex items-center justify-center p-4" onclick="handleBackdropClick(event, 'saveModal')">
+        <div class="modal-card bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl p-5 shadow-2xl border border-slate-100 dark:border-slate-700">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                        <i class="fas fa-bookmark"></i>
+                    </div>
+                    <h3 id="saveModalTitle" class="text-base font-bold text-slate-800 dark:text-slate-100">হিসাব সেভ করুন</h3>
+                </div>
+                <button onclick="closeModal('saveModal')" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center transition-colors cursor-pointer">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Live Amount Preview inside Save Modal -->
+            <div class="bg-slate-50 dark:bg-slate-900/70 border border-slate-200/70 dark:border-slate-700 rounded-2xl p-3 mb-4 flex items-center justify-between">
+                <span id="savePreviewLabel" class="text-xs font-semibold text-slate-500 dark:text-slate-400">মোট পরিমাণ</span>
+                <span id="savePreviewAmount" class="font-num text-lg font-extrabold text-emerald-600 dark:text-emerald-400 tabular-nums">৳ 0</span>
+            </div>
+
+            <label for="saveNameInput" id="saveInputLabel" class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">একটি নাম দিন (অপশনাল)</label>
+            <input type="text" id="saveNameInput" class="w-full px-3.5 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 focus:border-emerald-500 dark:focus:border-emerald-500 text-slate-800 dark:text-slate-100 text-sm font-medium outline-none transition-colors mb-4" placeholder="যেমন: দোকানের কালেকশন">
+
+            <button onclick="saveData()" id="saveConfirmBtn" class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm shadow-lg shadow-emerald-600/25 active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2">
+                <i class="fas fa-check"></i>
+                <span id="saveConfirmBtnText">সেভ করুন</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== HISTORY MODAL ==================== -->
+    <div id="historyModal" class="modal-backdrop fixed inset-0 bg-slate-900/55 backdrop-blur-xs z-50 flex items-center justify-center p-4" onclick="handleBackdropClick(event, 'historyModal')">
+        <div class="modal-card bg-white dark:bg-slate-800 w-full max-w-sm rounded-3xl p-5 shadow-2xl border border-slate-100 dark:border-slate-700 flex flex-col max-h-[80dvh]">
+            <div class="flex items-center justify-between mb-4 flex-shrink-0">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-teal-100 dark:bg-teal-900/60 text-teal-600 dark:text-teal-400 flex items-center justify-center">
+                        <i class="fas fa-clock-rotate-left"></i>
+                    </div>
+                    <div>
+                        <h3 id="historyModalTitle" class="text-base font-bold text-slate-800 dark:text-slate-100 leading-tight">সেভ করা হিস্ট্রি</h3>
+                        <p id="historyHint" class="text-[11px] text-slate-400">লোড করতে যেকোনো হিসাবে ট্যাপ করুন</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('historyModal')" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 flex items-center justify-center transition-colors cursor-pointer">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+
+            <!-- History Items Container -->
+            <div id="historyListContainer" class="overflow-y-auto custom-scroll space-y-2.5 pr-1 flex-1">
+                <!-- Populated dynamically -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="noHistoryMsg" class="hidden py-10 text-center">
+                <div class="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-700/60 text-slate-300 dark:text-slate-500 flex items-center justify-center mx-auto mb-3 text-2xl">
+                    <i class="fas fa-inbox"></i>
+                </div>
+                <p id="noHistoryText" class="text-sm font-medium text-slate-400 dark:text-slate-500">কোনো সেভ করা হিস্ট্রি নেই</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== ABOUT / DEVELOPER CREDIT MODAL ==================== -->
+    <div id="aboutModal" class="modal-backdrop fixed inset-0 bg-slate-900/55 backdrop-blur-xs z-50 flex items-center justify-center p-4" onclick="handleBackdropClick(event, 'aboutModal')">
+        <div class="modal-card bg-white dark:bg-slate-800 w-full max-w-xs sm:max-w-sm rounded-3xl overflow-hidden shadow-2xl border border-slate-100 dark:border-slate-700 relative">
+            <!-- Top Gradient Cover -->
+            <div class="h-20 bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-700 dark:from-emerald-800 dark:to-teal-950 relative">
+                <button onclick="closeModal('aboutModal')" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition-colors cursor-pointer">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+                <span id="aboutBadgeVersion" class="absolute top-3 left-3.5 px-2.5 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 text-[10px] font-num font-bold text-white tracking-wider">v2.0 Pro</span>
+            </div>
+
+            <!-- Developer Profile Content -->
+            <div class="px-5 pb-5 text-center -mt-9 relative">
+                <!-- Avatar Circle -->
+                <div class="w-18 h-18 w-[72px] h-[72px] rounded-2xl bg-white dark:bg-slate-800 p-1 shadow-lg mx-auto mb-3">
+                    <div class="w-full h-full rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-num font-extrabold text-xl flex items-center justify-center tracking-tight shadow-inner relative">
+                        <img id="aboutDevLogo" src="https://dreamifyweb.shop/logo.jpg" alt="Developer Logo" class="w-full h-full object-cover rounded-xl">
+                        <span class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-sky-500 border-2 border-white dark:border-slate-800 text-white flex items-center justify-center text-[9px]" title="Verified Developer">
+                            <i class="fas fa-check"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <p id="aboutCreditLabel" class="text-[11px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 mb-0.5">ডিজাইন ও ডেভলপমেন্ট</p>
+                <h3 id="aboutDevName" class="text-lg font-extrabold text-slate-800 dark:text-slate-100 leading-tight">Dreamify Web</h3>
+                <p id="aboutDevRole" class="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5 mb-4">ওয়েব ও অ্যাপ ডেভলপার</p>
+
+                <!-- App Privacy / Quality Highlight -->
+                <div class="bg-slate-50 dark:bg-slate-900/70 border border-slate-200/70 dark:border-slate-700/80 rounded-2xl p-3 mb-4 text-left flex items-start gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0 text-xs mt-0.5">
+                        <i class="fas fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <div id="aboutPrivacyTitle" class="text-xs font-bold text-slate-700 dark:text-slate-200">নিরাপদ ও সম্পূর্ণ অফলাইন</div>
+                        <p id="aboutPrivacyDesc" class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed mt-0.5">আপনার সব হিসাব শুধুমাত্র আপনার ডিভাইসেই সংরক্ষিত থাকে।</p>
+                    </div>
+                </div>
+
+                <!-- Dynamic Contact Buttons -->
+                <div id="aboutContactLinks" class="flex items-center justify-center gap-2 mb-4">
+                    <!-- Populated via DEVELOPER_INFO -->
+                </div>
+
+                <div id="aboutCopyright" class="text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+                    © 2026 Dreamify Web • সর্বস্বত্ব সংরক্ষিত
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== FLOATING TOAST ==================== -->
+    <div id="toast" class="toast-pill fixed bottom-24 left-1/2 z-[70] bg-slate-900/95 dark:bg-slate-100 text-white dark:text-slate-900 px-4 py-2.5 rounded-full shadow-xl flex items-center gap-2 text-xs sm:text-sm font-semibold whitespace-nowrap pointer-events-none">
+        <i id="toastIcon" class="fas fa-check-circle text-emerald-400 dark:text-emerald-600"></i>
+        <span id="toastText">সফল হয়েছে!</span>
+    </div>
+
+    <!-- ==================== APPLICATION LOGIC ==================== -->
+    <script>
+        // ============================================================
+        // ডেভলপার তথ্য — এখান থেকে আপনার নিজের নাম ও লিংক পরিবর্তন করুন
+        // ============================================================
+        const DEVELOPER_INFO = {
+            name: "Dreamify Web",                            // আপনার নাম (যেমন: "মোঃ রাফি আহমেদ" বা "Rafi Ahmed")
+            logo: "https://dreamifyweb.shop/logo.jpg",    // প্রোফাইল লোগো লিংক
+            roleBn: "ওয়েব ও অ্যাপ ডেভলপার",                 // বাংলায় আপনার পরিচয়/পদবি
+            roleEn: "Web & App Developer",                // ইংরেজিতে আপনার পরিচয়/পদবি
+            appVersion: "v2.0 Pro",                       // অ্যাপ ভার্সন
+            whatsapp: "https://wa.me/8801897953703",      // হোয়াটসঅ্যাপ লিংক (না চাইলে "" রাখুন)
+            telegram: "https://t.me/dreamifyweb_74",      // টেলিগ্রাম লিংক (না চাইলে "" রাখুন)
+            email: "mailto:dreamifyweb@gmail.com"         // ইমেইল (না চাইলে "" রাখুন)
+        };
+
+        // Bangladeshi Taka denominations with authentic color palettes
+        const denominations = [
+            { value: 1000, badge: 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-950/70 dark:text-purple-300 dark:border-purple-800/70' },
+            { value: 500,  badge: 'bg-teal-100 text-teal-800 border-teal-200 dark:bg-teal-950/70 dark:text-teal-300 dark:border-teal-800/70' },
+            { value: 200,  badge: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950/70 dark:text-amber-300 dark:border-amber-800/70' },
+            { value: 100,  badge: 'bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-950/70 dark:text-sky-300 dark:border-sky-800/70' },
+            { value: 50,   badge: 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-950/70 dark:text-orange-300 dark:border-orange-800/70' },
+            { value: 20,   badge: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950/70 dark:text-emerald-300 dark:border-emerald-800/70' },
+            { value: 10,   badge: 'bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-950/70 dark:text-rose-300 dark:border-rose-800/70' },
+            { value: 5,    badge: 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-950/70 dark:text-indigo-300 dark:border-indigo-800/70' },
+            { value: 2,    badge: 'bg-lime-100 text-lime-800 border-lime-200 dark:bg-lime-950/70 dark:text-lime-300 dark:border-lime-800/70' },
+            { value: 1,    badge: 'bg-slate-200 text-slate-700 border-slate-300 dark:bg-slate-700 dark:text-slate-200 dark:border-slate-600' }
+        ];
+
+        const MAX_LIMIT = 1000000000; // 100 Crore Limit
+        let currentLang = 'bn';
+        let pendingAction = null;
+        let toastTimer = null;
+
+        // Safe localStorage wrapper to prevent errors in restricted environments
+        const storage = {
+            get(key) {
+                try { return localStorage.getItem(key); } catch (e) { return null; }
+            },
+            set(key, val) {
+                try { localStorage.setItem(key, val); } catch (e) {}
+            },
+            remove(key) {
+                try { localStorage.removeItem(key); } catch (e) {}
+            }
+        };
+
+        // Bilingual UI Dictionary
+        const i18n = {
+            bn: {
+                appTitle: "টাকা কাউন্টার প্রো",
+                appSubtitle: "সহজ ও নির্ভুল নোট হিসাব",
+                langBtnText: "EN",
+                history: "হিস্ট্রি",
+                copy: "কপি",
+                save: "সেভ",
+                reset: "রিসেট",
+                totalLabel: "সর্বমোট টাকা",
+                totalNotesHeading: "মোট নোট",
+                notesUnit: "টি",
+                enterAmount: "টাকার পরিমাণ লিখুন",
+                limitExceeded: "সীমা অতিক্রান্ত!",
+                limitWord: "সর্বোচ্চ সীমা ১০০ কোটি টাকা",
+                saveModalTitle: "হিসাব সেভ করুন",
+                savePreviewLabel: "মোট পরিমাণ",
+                saveInputLabel: "একটি নাম দিন (অপশনাল)",
+                savePlaceholder: "যেমন: দোকানের কালেকশন",
+                saveBtn: "সেভ করুন",
+                historyModalTitle: "সেভ করা হিস্ট্রি",
+                historyHint: "লোড করতে যেকোনো হিসাবে ট্যাপ করুন",
+                noHistory: "কোনো সেভ করা হিস্ট্রি নেই",
+                cancel: "না থাক",
+                untitled: "নামহীন হিসাব",
+                toastEnterFirst: "আগে টাকার পরিমাণ লিখুন!",
+                toastLimitSave: "সীমা অতিক্রান্ত! সেভ করা যাবে না।",
+                toastSaved: "সফলভাবে সেভ হয়েছে!",
+                toastReset: "সব হিসাব রিসেট হয়েছে!",
+                toastDeleted: "হিস্ট্রি থেকে মুছে ফেলা হয়েছে",
+                toastLoaded: "হিসাব লোড হয়েছে!",
+                toastCopied: "হিসাব কপি করা হয়েছে!",
+                toastLang: "ভাষা: বাংলা",
+                resetTitle: "নতুন করে শুরু?",
+                resetMsg: "বর্তমান সব হিসাব মুছে দিয়ে নতুন করে শুরু করতে চান?",
+                resetConfirm: "হ্যাঁ, মুছুন",
+                deleteTitle: "মুছে ফেলবেন?",
+                deleteMsg: "এই হিসাবটি কি হিস্ট্রি থেকে স্থায়ীভাবে মুছে ফেলতে চান?",
+                deleteConfirm: "মুছে ফেলুন",
+                loadTitle: "লোড করবেন?",
+                loadMsg: "বর্তমান হিসাব বাদ দিয়ে এই পুরনো হিসাবটি লোড করতে চান?",
+                loadConfirm: "লোড করুন",
+                creditPrefix: "তৈরি করেছেন",
+                aboutCreditLabel: "ডিজাইন ও ডেভলপমেন্ট",
+                aboutPrivacyTitle: "নিরাপদ ও সম্পূর্ণ অফলাইন",
+                aboutPrivacyDesc: "আপনার সব হিসাব শুধুমাত্র আপনার ডিভাইসেই সংরক্ষিত থাকে।",
+                aboutRights: "সর্বস্বত্ব সংরক্ষিত"
+            },
+            en: {
+                appTitle: "Taka Counter Pro",
+                appSubtitle: "Fast & Accurate Cash Counter",
+                langBtnText: "বাংলা",
+                history: "History",
+                copy: "Copy",
+                save: "Save",
+                reset: "Reset",
+                totalLabel: "Grand Total",
+                totalNotesHeading: "Total Notes",
+                notesUnit: "pcs",
+                enterAmount: "Enter note quantities",
+                limitExceeded: "Limit Exceeded!",
+                limitWord: "Maximum limit is 100 Crore Taka",
+                saveModalTitle: "Save Calculation",
+                savePreviewLabel: "Total Amount",
+                saveInputLabel: "Add a label (optional)",
+                savePlaceholder: "e.g., Shop Daily Closing",
+                saveBtn: "Save Record",
+                historyModalTitle: "Saved History",
+                historyHint: "Tap any record to load it",
+                noHistory: "No saved history yet",
+                cancel: "Cancel",
+                untitled: "Untitled Record",
+                toastEnterFirst: "Please enter an amount first!",
+                toastLimitSave: "Limit exceeded! Cannot save.",
+                toastSaved: "Saved successfully!",
+                toastReset: "Cleared successfully!",
+                toastDeleted: "Record deleted",
+                toastLoaded: "Record loaded!",
+                toastCopied: "Summary copied to clipboard!",
+                toastLang: "Language: English",
+                resetTitle: "Start Fresh?",
+                resetMsg: "Do you want to clear all quantities and start over?",
+                resetConfirm: "Yes, Clear",
+                deleteTitle: "Delete Record?",
+                deleteMsg: "Are you sure you want to remove this record from history?",
+                deleteConfirm: "Delete",
+                loadTitle: "Load Record?",
+                loadMsg: "Replace your current entries with this saved record?",
+                loadConfirm: "Load",
+                creditPrefix: "Developed by",
+                aboutCreditLabel: "Designed & Developed by",
+                aboutPrivacyTitle: "Private & 100% Local",
+                aboutPrivacyDesc: "All your calculations stay securely on your own device.",
+                aboutRights: "All rights reserved"
+            }
+        };
+
+        // ==================== INITIALIZATION ====================
+        function initApp() {
+            // Load saved theme or respect system preference
+            const savedTheme = storage.get('tc_theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                updateThemeIcon(true);
+            } else {
+                updateThemeIcon(false);
+            }
+
+            // Load saved language
+            const savedLang = storage.get('tc_lang');
+            if (savedLang === 'en' || savedLang === 'bn') {
+                currentLang = savedLang;
+            }
+
+            renderDenominationRows();
+            applyLanguageUI();
+            renderDeveloperInfo();
+            loadAutoSavedData();
+
+            // Support Enter key in Save Modal
+            document.getElementById('saveNameInput').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') saveData();
+            });
+        }
+
+        // Build clean, responsive denomination cards
+        function renderDenominationRows() {
+            const listContainer = document.getElementById('inputList');
+            listContainer.innerHTML = '';
+
+            denominations.forEach((item, index) => {
+                const denom = item.value;
+                const row = document.createElement('div');
+                row.id = `row-${denom}`;
+                row.className = 'group bg-white dark:bg-slate-800/90 rounded-2xl px-2.5 py-2 border border-slate-200/80 dark:border-slate-700/80 shadow-xs flex items-center justify-between gap-2 transition-all duration-150 focus-within:border-emerald-500 dark:focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/15';
+
+                row.innerHTML = `
+                    <!-- Color-coded Note Badge -->
+                    <div class="w-[70px] sm:w-[76px] flex-shrink-0">
+                        <div class="${item.badge} border rounded-xl py-1.5 px-2 flex items-center justify-center gap-0.5 font-num font-bold text-xs sm:text-sm tabular-nums shadow-2xs select-none">
+                            <span class="opacity-75 text-[11px]">৳</span>
+                            <span>${denom}</span>
+                        </div>
+                    </div>
+
+                    <!-- Multiply Symbol -->
+                    <span class="text-slate-300 dark:text-slate-600 text-xs font-bold select-none">×</span>
+
+                    <!-- Quick Stepper + Input Group -->
+                    <div class="flex items-center bg-slate-100 dark:bg-slate-900/80 rounded-xl p-0.5 border border-slate-200/60 dark:border-slate-700/80">
+                        <button type="button" onclick="stepNote(${denom}, -1)" aria-label="Decrease ${denom}"
+                            class="w-7 h-8 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 hover:text-rose-500 active:scale-90 flex items-center justify-center transition-all cursor-pointer">
+                            <i class="fas fa-minus text-[10px]"></i>
+                        </button>
+
+                        <input type="number" inputmode="numeric" min="0" id="input-${denom}"
+                            class="qty-input font-num w-14 sm:w-16 bg-transparent text-center font-bold text-sm sm:text-base text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-600 outline-none tabular-nums"
+                            placeholder="0"
+                            oninput="calculate()"
+                            onfocus="this.select()"
+                            onkeydown="handleRowKeydown(event, ${index})">
+
+                        <button type="button" onclick="stepNote(${denom}, 1)" aria-label="Increase ${denom}"
+                            class="w-7 h-8 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 hover:text-emerald-600 dark:hover:text-emerald-400 active:scale-90 flex items-center justify-center transition-all cursor-pointer">
+                            <i class="fas fa-plus text-[10px]"></i>
+                        </button>
+                    </div>
+
+                    <!-- Row Subtotal -->
+                    <div class="flex-1 text-right min-w-[72px] pr-0.5">
+                        <div id="result-${denom}" class="font-num text-sm sm:text-[15px] font-bold text-slate-400 dark:text-slate-500 tabular-nums truncate transition-colors">0</div>
+                    </div>
+                `;
+                listContainer.appendChild(row);
+            });
+        }
+
+        // Move smoothly to next/previous note input using Enter or Arrow keys
+        function handleRowKeydown(event, index) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                const next = denominations[index + 1];
+                if (next) {
+                    const nextInput = document.getElementById(`input-${next.value}`);
+                    if (nextInput) nextInput.focus();
+                } else {
+                    event.target.blur();
+                }
+            }
+        }
+
+        // Increment or decrement note count with subtle haptic feedback
+        function stepNote(denom, delta) {
+            const input = document.getElementById(`input-${denom}`);
+            let val = parseInt(input.value, 10);
+            if (isNaN(val) || val < 0) val = 0;
+            const nextVal = Math.max(0, val + delta);
+            input.value = nextVal === 0 ? '' : nextVal;
+            if (navigator.vibrate) navigator.vibrate(10);
+            calculate();
+        }
+
+        // ==================== CORE CALCULATION ====================
+        function calculate() {
+            let grandTotal = 0;
+            let totalNotes = 0;
+            const t = i18n[currentLang];
+
+            denominations.forEach(({ value: denom }) => {
+                const input = document.getElementById(`input-${denom}`);
+                const rowEl = document.getElementById(`row-${denom}`);
+                const resEl = document.getElementById(`result-${denom}`);
+
+                let count = parseInt(input.value, 10);
+                if (isNaN(count) || count < 0) {
+                    count = 0;
+                    if (input.value && parseInt(input.value, 10) < 0) input.value = '';
+                }
+
+                const subTotal = count * denom;
+                grandTotal += subTotal;
+                totalNotes += count;
+
+                resEl.innerText = subTotal.toLocaleString('en-IN');
+
+                // Highlight active rows visually
+                if (count > 0) {
+                    resEl.classList.remove('text-slate-400', 'dark:text-slate-500');
+                    resEl.classList.add('text-emerald-700', 'dark:text-emerald-400');
+                    rowEl.classList.add('border-emerald-200', 'dark:border-emerald-800/70', 'bg-emerald-50/25', 'dark:bg-emerald-950/20');
+                    rowEl.classList.remove('border-slate-200/80', 'dark:border-slate-700/80');
+                } else {
+                    resEl.classList.add('text-slate-400', 'dark:text-slate-500');
+                    resEl.classList.remove('text-emerald-700', 'dark:text-emerald-400');
+                    rowEl.classList.remove('border-emerald-200', 'dark:border-emerald-800/70', 'bg-emerald-50/25', 'dark:bg-emerald-950/20');
+                    rowEl.classList.add('border-slate-200/80', 'dark:border-slate-700/80');
+                }
+            });
+
+            // Persist current state automatically
+            saveAutoSavedData();
+
+            const grandTotalEl = document.getElementById('grandTotal');
+            const wordBox = document.getElementById('wordBox');
+            const wordDisplay = document.getElementById('wordDisplay');
+            const totalNotesLabel = document.getElementById('totalNotesLabel');
+
+            totalNotesLabel.innerText = `${totalNotes.toLocaleString('en-IN')} ${t.notesUnit}`;
+
+            // Limit Validation (100 Crore)
+            if (grandTotal >= MAX_LIMIT) {
+                grandTotalEl.innerText = t.limitExceeded;
+                grandTotalEl.classList.remove('text-emerald-700', 'dark:text-emerald-400');
+                grandTotalEl.classList.add('text-rose-600', 'dark:text-rose-400');
+
+                wordDisplay.innerText = t.limitWord;
+                wordBox.className = 'bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800/70 text-rose-700 dark:text-rose-300 rounded-xl px-3 py-2 mb-3 min-h-[38px] flex items-center justify-center text-center transition-colors';
+                return grandTotal;
+            }
+
+            // Valid Total Styles
+            grandTotalEl.classList.add('text-emerald-700', 'dark:text-emerald-400');
+            grandTotalEl.classList.remove('text-rose-600', 'dark:text-rose-400');
+            wordBox.className = 'bg-emerald-50/90 dark:bg-emerald-950/50 border border-emerald-200/70 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300 rounded-xl px-3 py-2 mb-3 min-h-[38px] flex items-center justify-center text-center transition-colors';
+
+            grandTotalEl.innerText = '৳ ' + grandTotal.toLocaleString('en-IN');
+            updateWords(grandTotal);
+            return grandTotal;
+        }
+
+        function updateWords(amount) {
+            const display = document.getElementById('wordDisplay');
+            if (amount === 0) {
+                display.innerText = i18n[currentLang].enterAmount;
+                return;
+            }
+            display.innerText = currentLang === 'bn' ? convertToBangla(amount) : convertToEnglish(amount);
+        }
+
+        // ==================== AUTO SAVE & RESTORE ====================
+        function saveAutoSavedData() {
+            const currentData = {};
+            let hasData = false;
+            denominations.forEach(({ value: denom }) => {
+                const val = document.getElementById(`input-${denom}`).value;
+                if (val && parseInt(val, 10) > 0) {
+                    currentData[denom] = val;
+                    hasData = true;
+                }
+            });
+
+            if (hasData) {
+                storage.set('tc_current_state', JSON.stringify(currentData));
+            } else {
+                storage.remove('tc_current_state');
+            }
+        }
+
+        function loadAutoSavedData() {
+            try {
+                const raw = storage.get('tc_current_state');
+                if (!raw) {
+                    calculate();
+                    return;
+                }
+                const savedData = JSON.parse(raw);
+                if (savedData && typeof savedData === 'object') {
+                    denominations.forEach(({ value: denom }) => {
+                        if (savedData[denom]) {
+                            document.getElementById(`input-${denom}`).value = savedData[denom];
+                        }
+                    });
+                }
+            } catch (e) {
+                // Ignore corrupted storage data
+            }
+            calculate();
+        }
+
+        // ==================== COPY BREAKDOWN SUMMARY ====================
+        function copySummary() {
+            const total = calculate();
+            const t = i18n[currentLang];
+            if (total === 0) {
+                showToast(t.toastEnterFirst, 'warning');
+                return;
+            }
+            if (total >= MAX_LIMIT) {
+                showToast(t.limitExceeded, 'error');
+                return;
+            }
+
+            let lines = [];
+            let totalNotes = 0;
+            const headerTitle = currentLang === 'bn' ? '📊 টাকার হিসাব' : '📊 Cash Summary';
+            lines.push(headerTitle);
+            lines.push('------------------------');
+
+            denominations.forEach(({ value: denom }) => {
+                const count = parseInt(document.getElementById(`input-${denom}`).value, 10) || 0;
+                if (count > 0) {
+                    totalNotes += count;
+                    lines.push(`৳${denom} × ${count} = ৳${(denom * count).toLocaleString('en-IN')}`);
+                }
+            });
+
+            lines.push('------------------------');
+            if (currentLang === 'bn') {
+                lines.push(`মোট নোট: ${totalNotes.toLocaleString('en-IN')} টি`);
+                lines.push(`সর্বমোট: ৳ ${total.toLocaleString('en-IN')}`);
+                lines.push(`কথায়: ${convertToBangla(total)}`);
+            } else {
+                lines.push(`Total Notes: ${totalNotes.toLocaleString('en-IN')} pcs`);
+                lines.push(`Grand Total: ৳ ${total.toLocaleString('en-IN')}`);
+                lines.push(`In Words: ${convertToEnglish(total)}`);
+            }
+
+            const textToCopy = lines.join('\n');
+            copyTextToClipboard(textToCopy);
+            showToast(t.toastCopied, 'success');
+        }
+
+        // Reliable iFrame-safe clipboard copy using document.execCommand
+        function copyTextToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+            } catch (err) {
+                // Silent fail fallback
+            }
+            document.body.removeChild(textarea);
+        }
+
+        // ==================== CONFIRMATION MODAL ====================
+        function openConfirmModal({ title, message, actionCallback, btnText, type = 'danger' }) {
+            const t = i18n[currentLang];
+            document.getElementById('confirmTitle').innerText = title;
+            document.getElementById('confirmMsg').innerText = message;
+            document.getElementById('confirmCancelBtn').innerText = t.cancel;
+
+            const iconWrapper = document.getElementById('confirmIconWrapper');
+            const icon = document.getElementById('confirmIcon');
+            const actionBtn = document.getElementById('confirmActionBtn');
+
+            // Clone to remove old listeners
+            const newBtn = actionBtn.cloneNode(true);
+            actionBtn.parentNode.replaceChild(newBtn, actionBtn);
+            newBtn.innerText = btnText;
+
+            if (type === 'danger') {
+                iconWrapper.className = 'w-16 h-16 rounded-2xl bg-rose-50 dark:bg-rose-950/60 text-rose-500 flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner';
+                icon.className = 'fas fa-trash-can';
+                newBtn.className = 'flex-1 py-2.5 px-4 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-semibold text-sm shadow-lg shadow-rose-500/25 active:scale-95 transition-all cursor-pointer';
+            } else if (type === 'reset') {
+                iconWrapper.className = 'w-16 h-16 rounded-2xl bg-amber-50 dark:bg-amber-950/60 text-amber-500 flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner';
+                icon.className = 'fas fa-broom';
+                newBtn.className = 'flex-1 py-2.5 px-4 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-semibold text-sm shadow-lg shadow-rose-500/25 active:scale-95 transition-all cursor-pointer';
+            } else {
+                iconWrapper.className = 'w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner';
+                icon.className = 'fas fa-arrow-rotate-left';
+                newBtn.className = 'flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm shadow-lg shadow-emerald-600/25 active:scale-95 transition-all cursor-pointer';
+            }
+
+            pendingAction = actionCallback;
+            newBtn.addEventListener('click', () => {
+                if (pendingAction) pendingAction();
+                closeConfirmModal();
+            });
+
+            document.getElementById('confirmModal').classList.add('active');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.remove('active');
+            pendingAction = null;
+        }
+
+        // ==================== RESET LOGIC ====================
+        function requestReset() {
+            const total = calculate();
+            const t = i18n[currentLang];
+            if (total === 0) {
+                showToast(t.toastEnterFirst, 'warning');
+                return;
+            }
+            openConfirmModal({
+                title: t.resetTitle,
+                message: t.resetMsg,
+                actionCallback: () => resetAll(true),
+                btnText: t.resetConfirm,
+                type: 'reset'
+            });
+        }
+
+        function resetAll(showMsg = true) {
+            document.querySelectorAll('.qty-input').forEach(i => i.value = '');
+            storage.remove('tc_current_state');
+            calculate();
+            if (navigator.vibrate) navigator.vibrate(35);
+            if (showMsg) showToast(i18n[currentLang].toastReset, 'success');
+        }
+
+        // ==================== SAVE LOGIC ====================
+        function openSaveModal() {
+            const total = calculate();
+            const t = i18n[currentLang];
+
+            if (total === 0) {
+                showToast(t.toastEnterFirst, 'warning');
+                return;
+            }
+            if (total >= MAX_LIMIT) {
+                showToast(t.toastLimitSave, 'error');
+                return;
+            }
+
+            document.getElementById('savePreviewAmount').innerText = '৳ ' + total.toLocaleString('en-IN');
+            const input = document.getElementById('saveNameInput');
+            input.value = '';
+            document.getElementById('saveModal').classList.add('active');
+            setTimeout(() => input.focus(), 120);
+        }
+
+        function saveData() {
+            const t = i18n[currentLang];
+            const name = document.getElementById('saveNameInput').value.trim();
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-GB');
+            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+            const counts = {};
+            let totalNotes = 0;
+            denominations.forEach(({ value: d }) => {
+                const val = parseInt(document.getElementById(`input-${d}`).value, 10);
+                if (val && val > 0) {
+                    counts[d] = String(val);
+                    totalNotes += val;
+                }
+            });
+
+            const record = {
+                id: Date.now(),
+                name: name || t.untitled,
+                date: dateStr,
+                time: timeStr,
+                total: calculate(),
+                totalNotes: totalNotes,
+                counts: counts
+            };
+
+            let history = getHistoryList();
+            history.unshift(record);
+            storage.set('tc_history', JSON.stringify(history));
+
+            closeModal('saveModal');
+            showToast(t.toastSaved, 'success');
+        }
+
+        // ==================== HISTORY LOGIC ====================
+        function getHistoryList() {
+            try {
+                return JSON.parse(storage.get('tc_history') || '[]');
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function escapeHTML(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function openHistory() {
+            const history = getHistoryList();
+            const container = document.getElementById('historyListContainer');
+            const emptyState = document.getElementById('noHistoryMsg');
+            const t = i18n[currentLang];
+
+            container.innerHTML = '';
+
+            if (history.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                history.forEach(item => {
+                    // Calculate total notes gracefully for older saved records as well
+                    const noteSum = item.totalNotes || Object.values(item.counts || {}).reduce((acc, v) => acc + (parseInt(v, 10) || 0), 0);
+
+                    const card = document.createElement('div');
+                    card.className = 'bg-slate-50 dark:bg-slate-900/70 hover:bg-emerald-50/60 dark:hover:bg-slate-700/60 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl p-3 flex items-center justify-between gap-2.5 transition-colors';
+
+                    card.innerHTML = `
+                        <div class="flex-1 min-w-0 cursor-pointer" onclick="requestLoad(${item.id})">
+                            <div class="flex items-center justify-between gap-2 mb-1">
+                                <h4 class="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">${escapeHTML(item.name)}</h4>
+                            </div>
+                            <div class="flex items-center flex-wrap gap-x-2 gap-y-0.5">
+                                <span class="font-num text-sm font-extrabold text-emerald-600 dark:text-emerald-400 tabular-nums">৳ ${Number(item.total).toLocaleString('en-IN')}</span>
+                                <span class="text-[11px] font-medium text-slate-400 dark:text-slate-500">• ${noteSum} ${t.notesUnit}</span>
+                            </div>
+                            <div class="text-[11px] text-slate-400 dark:text-slate-500 mt-1 flex items-center gap-1">
+                                <i class="far fa-calendar text-[10px]"></i>
+                                <span>${escapeHTML(item.date)} • ${escapeHTML(item.time)}</span>
+                            </div>
+                        </div>
+
+                        <button onclick="requestDelete(${item.id})" class="w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-950/60 hover:bg-rose-500 text-rose-500 hover:text-white flex items-center justify-center flex-shrink-0 active:scale-90 transition-all cursor-pointer" title="Delete">
+                            <i class="fas fa-trash-can text-xs"></i>
+                        </button>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+
+            document.getElementById('historyModal').classList.add('active');
+        }
+
+        function requestDelete(id) {
+            const t = i18n[currentLang];
+            openConfirmModal({
+                title: t.deleteTitle,
+                message: t.deleteMsg,
+                actionCallback: () => deleteRecord(id),
+                btnText: t.deleteConfirm,
+                type: 'danger'
+            });
+        }
+
+        function deleteRecord(id) {
+            let history = getHistoryList().filter(item => item.id !== id);
+            storage.set('tc_history', JSON.stringify(history));
+            openHistory();
+            showToast(i18n[currentLang].toastDeleted, 'success');
+        }
+
+        function requestLoad(id) {
+            const t = i18n[currentLang];
+            openConfirmModal({
+                title: t.loadTitle,
+                message: t.loadMsg,
+                actionCallback: () => loadRecord(id),
+                btnText: t.loadConfirm,
+                type: 'load'
+            });
+        }
+
+        function loadRecord(id) {
+            const record = getHistoryList().find(item => item.id === id);
+            if (record) {
+                resetAll(false);
+                Object.keys(record.counts || {}).forEach(denom => {
+                    const el = document.getElementById(`input-${denom}`);
+                    if (el) el.value = record.counts[denom];
+                });
+                calculate();
+                closeModal('historyModal');
+                closeConfirmModal();
+                showToast(i18n[currentLang].toastLoaded, 'success');
+            }
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        function handleBackdropClick(event, id) {
+            if (event.target.id === id) {
+                if (id === 'confirmModal') closeConfirmModal();
+                else closeModal(id);
+            }
+        }
+
+        // ==================== LANGUAGE & THEME ====================
+        function toggleLanguage() {
+            currentLang = currentLang === 'bn' ? 'en' : 'bn';
+            storage.set('tc_lang', currentLang);
+            applyLanguageUI();
+            calculate();
+            showToast(i18n[currentLang].toastLang, 'info');
+        }
+
+        function applyLanguageUI() {
+            const t = i18n[currentLang];
+            document.documentElement.lang = currentLang;
+            document.title = t.appTitle;
+
+            document.getElementById('appTitle').innerText = t.appTitle;
+            document.getElementById('appSubtitle').innerText = t.appSubtitle;
+            document.getElementById('langLabel').innerText = t.langBtnText;
+            document.getElementById('btnHistoryText').innerText = t.history;
+            document.getElementById('btnCopyText').innerText = t.copy;
+            document.getElementById('btnSaveText').innerText = t.save;
+            document.getElementById('btnResetText').innerText = t.reset;
+            document.getElementById('totalLabel').innerText = t.totalLabel;
+            document.getElementById('totalNotesHeading').innerText = t.totalNotesHeading;
+
+            document.getElementById('saveModalTitle').innerText = t.saveModalTitle;
+            document.getElementById('savePreviewLabel').innerText = t.savePreviewLabel;
+            document.getElementById('saveInputLabel').innerText = t.saveInputLabel;
+            document.getElementById('saveNameInput').placeholder = t.savePlaceholder;
+            document.getElementById('saveConfirmBtnText').innerText = t.saveBtn;
+
+            document.getElementById('historyModalTitle').innerText = t.historyModalTitle;
+            document.getElementById('historyHint').innerText = t.historyHint;
+            document.getElementById('noHistoryText').innerText = t.noHistory;
+
+            renderDeveloperInfo();
+        }
+
+        // ==================== DEVELOPER CREDIT & ABOUT MODAL ====================
+        function renderDeveloperInfo() {
+            const t = i18n[currentLang];
+            const year = new Date().getFullYear();
+
+            // Update subtle footer signature
+            document.getElementById('footerAppVersion').innerText = DEVELOPER_INFO.appVersion;
+            document.getElementById('footerCreditPrefix').innerText = t.creditPrefix;
+            document.getElementById('footerDevName').innerText = DEVELOPER_INFO.name;
+
+            // Update About Modal content
+            document.getElementById('aboutBadgeVersion').innerText = DEVELOPER_INFO.appVersion;
+            document.getElementById('aboutDevLogo').src = DEVELOPER_INFO.logo;
+            document.getElementById('aboutCreditLabel').innerText = t.aboutCreditLabel;
+            document.getElementById('aboutDevName').innerText = DEVELOPER_INFO.name;
+            document.getElementById('aboutDevRole').innerText = currentLang === 'bn' ? DEVELOPER_INFO.roleBn : DEVELOPER_INFO.roleEn;
+            document.getElementById('aboutPrivacyTitle').innerText = t.aboutPrivacyTitle;
+            document.getElementById('aboutPrivacyDesc').innerText = t.aboutPrivacyDesc;
+            document.getElementById('aboutCopyright').innerText = `© ${year} ${DEVELOPER_INFO.name} • ${t.aboutRights}`;
+
+            // Render active social/contact buttons
+            const linksContainer = document.getElementById('aboutContactLinks');
+            const links = [
+                {
+                    url: DEVELOPER_INFO.whatsapp,
+                    label: 'WhatsApp',
+                    icon: 'fab fa-whatsapp',
+                    classes: 'bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-500 text-emerald-600 dark:text-emerald-400 hover:text-white border-emerald-200/80 dark:border-emerald-800/70'
+                },
+                {
+                    url: DEVELOPER_INFO.telegram,
+                    label: 'Telegram',
+                    icon: 'fab fa-telegram',
+                    classes: 'bg-sky-50 dark:bg-sky-950/60 hover:bg-sky-500 text-sky-600 dark:text-sky-400 hover:text-white border-sky-200/80 dark:border-sky-800/70'
+                },
+                {
+                    url: DEVELOPER_INFO.email,
+                    label: 'Email',
+                    icon: 'fas fa-envelope',
+                    classes: 'bg-slate-100 dark:bg-slate-700/70 hover:bg-slate-700 dark:hover:bg-slate-200 text-slate-600 dark:text-slate-300 hover:text-white dark:hover:text-slate-900 border-slate-200 dark:border-slate-600'
+                }
+            ].filter(item => item.url && item.url.trim() !== '');
+
+            linksContainer.innerHTML = links.map(item => `
+                <a href="${escapeHTML(item.url)}" target="_blank" rel="noopener noreferrer"
+                    class="flex-1 py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95 ${item.classes}">
+                    <i class="${item.icon}"></i>
+                    <span>${item.label}</span>
+                </a>
+            `).join('');
+
+            linksContainer.style.display = links.length ? 'flex' : 'none';
+        }
+
+        function openAboutModal() {
+            renderDeveloperInfo();
+            document.getElementById('aboutModal').classList.add('active');
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            storage.set('tc_theme', isDark ? 'dark' : 'light');
+            updateThemeIcon(isDark);
+        }
+
+        function updateThemeIcon(isDark) {
+            const icon = document.getElementById('themeIcon');
+            icon.className = isDark ? 'fas fa-sun text-amber-300 text-xs' : 'fas fa-moon text-xs';
+        }
+
+        // ==================== TOAST NOTIFICATION ====================
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toastText');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastText.innerText = msg;
+
+            if (type === 'warning') {
+                toastIcon.className = 'fas fa-circle-exclamation text-amber-400 dark:text-amber-600';
+            } else if (type === 'error') {
+                toastIcon.className = 'fas fa-circle-xmark text-rose-400 dark:text-rose-600';
+            } else if (type === 'info') {
+                toastIcon.className = 'fas fa-globe text-sky-400 dark:text-sky-600';
+            } else {
+                toastIcon.className = 'fas fa-check-circle text-emerald-400 dark:text-emerald-600';
+            }
+
+            toast.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+        }
+
+        // ==================== NUMBER TO WORDS CONVERTERS ====================
+        function convertToBangla(n) {
+            const units = [
+                "", "এক", "দুই", "তিন", "চার", "পাঁচ", "ছয়", "সাত", "আট", "নয়", "দশ",
+                "এগারো", "বারো", "তেরো", "চৌদ্দ", "পনেরো", "ষোল", "সতেরো", "আঠারো", "উনিশ", "বিশ",
+                "একুশ", "বাইশ", "তেইশ", "চব্বিশ", "পঁচিশ", "ছাব্বিশ", "সাতাশ", "আঠাশ", "ঊনত্রিশ", "ত্রিশ",
+                "একত্রিশ", "বত্রিশ", "তেত্রিশ", "চৌত্রিশ", "পঁয়ত্রিশ", "ছত্রিশ", "সাঁইত্রিশ", "আটত্রিশ", "ঊনচল্লিশ", "চল্লিশ",
+                "একচল্লিশ", "বিয়াল্লিশ", "তেতাল্লিশ", "চুয়াল্লিশ", "পঁয়তাল্লিশ", "ছেচল্লিশ", "সাতচল্লিশ", "আটচল্লিশ", "ঊনপঞ্চাশ", "পঞ্চাশ",
+                "একান্ন", "বায়ান্ন", "তিপ্পান্ন", "চুয়ান্ন", "পঞ্চান্ন", "ছাপ্পান্ন", "সাতান্ন", "আটান্ন", "ঊনষাট", "ষাট",
+                "একষট্টি", "বাষট্টি", "তেষট্টি", "চৌষট্টি", "পঁয়ষট্টি", "ছেষট্টি", "সাতষট্টি", "আটষট্টি", "ঊনসত্তর", "সত্তর",
+                "একাত্তর", "বাহাত্তর", "তিয়াত্তর", "চৌহাত্তর", "পঁচাত্তর", "ছিয়াত্তর", "সাতাত্তর", "আটাত্তর", "ঊনআশি", "আশি",
+                "একাশি", "বিরাশি", "তিরাশি", "চুরাশি", "পঁচাশি", "ছিয়াশি", "সাতাশি", "আটাশি", "ঊননব্বই", "নব্বই",
+                "একানব্বই", "বিরানব্বই", "তিরানব্বই", "চুরানব্বই", "পঁচানব্বই", "ছিয়ানব্বই", "সাতানব্বই", "আটানব্বই", "নিরানব্বই"
+            ];
+
+            let str = "";
+            const crore = Math.floor(n / 10000000); n %= 10000000;
+            const lakh = Math.floor(n / 100000); n %= 100000;
+            const thousand = Math.floor(n / 1000); n %= 1000;
+            const hundred = Math.floor(n / 100); n %= 100;
+
+            if (crore > 0) str += units[crore] + " কোটি ";
+            if (lakh > 0) str += units[lakh] + " লক্ষ ";
+            if (thousand > 0) str += units[thousand] + " হাজার ";
+            if (hundred > 0) str += units[hundred] + " শত ";
+            if (n > 0) str += units[n];
+            return str.trim() + " টাকা মাত্র";
+        }
+
+        function convertToEnglish(num) {
+            const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
+            const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+            const numStr = num.toString();
+            if (numStr.length > 9) return 'Too Large';
+
+            const n = ('000000000' + numStr).slice(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+            if (!n) return '';
+
+            let str = '';
+            str += (Number(n[1]) !== 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+            str += (Number(n[2]) !== 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+            str += (Number(n[3]) !== 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+            str += (Number(n[4]) !== 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+            str += (Number(n[5]) !== 0) ? ((str !== '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) : '';
+
+            return str.replace(/\s+/g, ' ').trim() + " Taka Only";
+        }
+
+        // Start App
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>

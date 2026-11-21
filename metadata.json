@@ -1,0 +1,6 @@
+{
+  "name": "টাকা কাউন্টার প্রো",
+  "description": "Taka Counter Pro — Fast, accurate Bangladeshi Taka note counter packaged as a native Android WebView app with offline history, bilingual Bangla/English UI, and dark mode.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

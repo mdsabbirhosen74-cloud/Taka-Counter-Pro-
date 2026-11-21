@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.MyApplication" parent="android:Theme.DeviceDefault.NoActionBar">
+        <item name="android:statusBarColor">@color/emerald_status_bar</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowBackground">@color/emerald_status_bar</item>
+    </style>
+</resources>
